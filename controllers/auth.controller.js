@@ -3,6 +3,7 @@ const {
   } = require("../models");
   const bcrypt = require("bcrypt");
   const accessToken = require("../middlewares/generateToken");
+  const emailMaker = require("../utils/emailSender")
   const { Op, literal } = require("sequelize");
   
   const handleError = (error, res) => {
@@ -104,6 +105,82 @@ const {
       if (isEmailTaken) return res.status(409).send("Email already taken");
       const newUser = await User.create(req.body);
       res.json({ user: newUser });
+    } catch (error) {
+      handleError(error, res);
+    }
+  };
+
+  exports.forgotPassword = async (req, res) => {
+    try {
+      // Check for required fields in the request body
+      if (!req.body.email) {
+        return res.status(400).json({ message: "Email is required" });
+      }
+  
+      const isUser = await User.findOne({
+        where: [{
+          email: req.body.email,
+        },{
+          isDeleted: false,
+        }],
+      });
+  
+      if (!isUser)
+        return res
+          .status(404)
+          .send(
+            "Email address is not associated with any account registered on the system."
+          );
+  
+      // Switch to the specified environment
+      // Logic for handling forgot password
+      // Generate a password reset token and send it to the user's email
+      let email =isUser.email;
+      const user = { email: email, id: isUser.id };
+      const token = await accessToken.forgetpasswordToken(user);
+      const resetPasswordURL = `${process.env.FRONTEND_URL}/reset-password?token=${token}`;
+  
+      result = emailMaker(
+        "resetPassword",
+        isUser,
+        req.body.email,
+        "Reset Password",
+        resetPasswordURL
+      );
+  
+      // Send a response indicating that the password reset email has been sent
+  
+      if (result == 401) res.status(401).send({ message: "Request Denied!" });
+      else
+        res.status(201).send({ message: "Password reset email has been sent!" });
+    } catch (error) {
+      handleError(error, res);
+    }
+  };
+
+
+  exports.resetPassword = async (req, res) => {
+    try {
+      const { id, email } = req.credentials;
+      const newPassword = req.body.password.trim();
+      // Check for required fields in the request body
+      if (!newPassword) {
+        return res.status(400).json({ message: "Password is required" });
+      }
+      const isUser = await User.findOne({
+        where:[{
+          isDeleted: false,
+          id: id,
+          email: email,
+        }]
+      });
+  
+      if (!isUser)
+        return res.status(404).send({ message: "account doesn`t exist" });
+  
+      isUser.password = newPassword;
+      await isUser.save();
+      res.json({ message: "Password has been reset successfully" });
     } catch (error) {
       handleError(error, res);
     }
