@@ -31,20 +31,24 @@ module.exports = {
         "users",
         [
           {
-            name: "Admin",
+            firstName: "Admin",
+            middleName: "Admin",
+            lastName: "Admin",
             email: "admin@gmail.com",
             password: hashedPass,
             role: "admin",
-            status: "active",
+            status: true,
             createdAt: new Date(),
             updatedAt: new Date(),
           },
           {
-            name:"gwapo",
+            firstName: "Admin",
+            middleName: "Admin",
+            lastName: "Admin",
             email:"lebasorajohnjefferson@gmail.com",
             password: hashedPass,
             role: "admin",
-            status: "active",
+            status: true,
             createdAt: new Date(),
             updatedAt: new Date()
           }

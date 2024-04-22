@@ -9,8 +9,18 @@ module.exports = {
         primaryKey: true,
         type: Sequelize.INTEGER
       },
-      name: {
+      firstName: {
         type: Sequelize.STRING
+      },
+      middleName: {
+        type: Sequelize.STRING
+      },
+      lastName: {
+        type: Sequelize.STRING
+      },
+      suffix: {
+        type: Sequelize.STRING,
+        allowNull:true
       },
       image: {
         type: Sequelize.STRING
@@ -25,7 +35,7 @@ module.exports = {
         type: Sequelize.STRING
       },
       status: {
-        type: Sequelize.STRING
+        type: Sequelize.BOOLEAN,
       },
       isDeleted: {
         type: Sequelize.BOOLEAN,

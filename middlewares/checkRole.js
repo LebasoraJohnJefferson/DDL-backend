@@ -8,7 +8,7 @@ exports.isAdmin = async (req, res, next) => {
         id: id,
         role: "admin",
       },
-      attributes: ["name", "email"],
+      attributes: ["firstName", "email"],
     });
 
     if (!user) return res.sendStatus(401);

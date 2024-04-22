@@ -25,7 +25,7 @@ module.exports = (template, receiver, email, title, customLink = null) => {
     {
       from: "ddl_support@gmail.com",
       to: email,
-      subject: `Intel alumni | ${title}`,
+      subject: `DDL | ${title}`,
       template: template,
       context: {
         name: receiver.name,

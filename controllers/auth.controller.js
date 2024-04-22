@@ -40,7 +40,7 @@ const {
       }
   
       // Check user status
-      if (user.status != "active") {
+      if (!user.status) {
         return res.status(404).json({
           message:
             "Your account is inactive. Please contact the system administrator.",
