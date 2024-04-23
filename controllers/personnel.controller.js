@@ -12,6 +12,10 @@ exports.createPersonnel = async (req, res) => {
       where: { email: email },
     });
 
+    const emailValidated = validateEmail(email)
+
+    if(!emailValidated) return res.status(409).json({message:'Invalid Email'})
+
     if (emailCheck) return res.status(401).json({ message: "Email address already used." });
     const defaultPassword = '12345';
     const trimmedPassword = password ? password.trim() : '';
@@ -58,6 +62,63 @@ exports.getPersonnel = async (req,res)=>{
 }
 
 
+exports.updatePersonnel = async (req,res)=>{
+  try{
+    const {id} = req.credentials
+    const {userId} = req.params;
+    const { email, password,status,courseId } = req.body;
+    
+    const emailValidated = validateEmail(email)
+
+    if(!emailValidated) return res.status(409).json({message:'Invalid Email'})
+
+    const isAdmin = await User.findOne({where:{id:id}}); 
+
+    if(!isAdmin) return res.status(409).json({message:'Unauthorized user!'})
+
+    const isUser = await User.findOne({where:{id:userId}})
+    
+    if(!isUser) return res.status(404).json({message:'User not found!'})
+
+    const isEmailAlreadyExist = await User.findOne({
+      where:{
+        email:email,
+        id:{
+          [Op.not]:userId
+        }
+      }
+    })
+
+    if(isEmailAlreadyExist) return res.status(409).json({message:'Email already used!'})
+
+
+    const defaultPassword = '12345';
+    const trimmedPassword = password ? password.trim() : '';
+    let user = await isUser.update({
+      ...req.body,
+      password:trimmedPassword || defaultPassword,
+      status: status==null ? false : status,
+      role:"personnel",
+    });
+
+    const userCredential = await UserCredential.findOne({
+      where:{
+        userId:user.id
+      }
+    })
+
+    if(userCredential) await userCredential.update({courseId:courseId})
+
+    
+
+
+    res.status(404).json({message:'Successfully updated'})
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+
 exports.deletePersonnel = async(req,res)=>{
   try{
     const {userId} = req.params;
@@ -77,3 +138,60 @@ exports.deletePersonnel = async(req,res)=>{
     console.log(error);
   }
 }
+
+exports.importPersonnel = async(req,res)=>{
+  try{
+    const personnels = req.body
+    personnels.map(async(personnel)=>{
+      const {faculty,email,status,...rest} = personnel
+
+      const isValidEmail = validateEmail(email)
+      if(!isValidEmail) return
+
+      const isEmailExist = await User.findOne({
+        where:{
+          email:email
+        }
+      })
+
+      if(isEmailExist) return
+
+      let isCourse = await Course.findOne({
+        where:{
+          acronym:faculty ? faculty?.toUpperCase() : ''
+        }
+      })
+
+      if(!isCourse) return
+      let tempStatus = {
+        'INACTIVE':false,
+        'ACTIVE':true
+      }
+      const stat = status ? status.toUpperCase() : ''
+      const user = await User.create({
+        ...rest,
+        status:tempStatus[stat] ? tempStatus[stat]  : false ,
+        email:email,
+        password:'12345',
+        role:'personnel'
+      })
+
+      await UserCredential.create({
+        courseId:isCourse?.id,
+        userId:user?.id
+      })
+
+
+    })
+
+    res.status(201).send({message:'Successfully imported'})
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+
+const validateEmail = (email) => {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailRegex.test(email);
+};
