@@ -5,7 +5,7 @@ const {
   } = require("../models");
   const { Op } = require('sequelize');
 
-exports.createPersonnel = async (req, res) => {
+exports.createStudent = async (req, res) => {
   try {
     const { email, password,status,courseId } = req.body;
     const emailCheck = await User.findOne({
@@ -23,7 +23,7 @@ exports.createPersonnel = async (req, res) => {
       ...req.body,
       password:trimmedPassword || defaultPassword,
       status: status==null ? false : status,
-      role:"personnel",
+      role:"student",
     });
 
     await UserCredential.create({
@@ -37,7 +37,7 @@ exports.createPersonnel = async (req, res) => {
   }
 };
 
-exports.getPersonnel = async (req,res)=>{
+exports.getStudent = async (req,res)=>{
   try{
     const users= await User.findAll({
       include: [
@@ -49,7 +49,7 @@ exports.getPersonnel = async (req,res)=>{
       where:{
         isDeleted:false,
         role:{
-          [Op.not]:['admin','student'],
+          [Op.not]:['admin','personnel']
         }
       },
       attributes:{exclude:['password']},
@@ -62,7 +62,7 @@ exports.getPersonnel = async (req,res)=>{
 }
 
 
-exports.updatePersonnel = async (req,res)=>{
+exports.updateStudent = async (req,res)=>{
   try{
     const {id} = req.credentials
     const {userId} = req.params;
@@ -98,7 +98,7 @@ exports.updatePersonnel = async (req,res)=>{
       ...req.body,
       password:trimmedPassword || defaultPassword,
       status: status==null ? false : status,
-      role:"personnel",
+      role:"student",
     });
 
     const userCredential = await UserCredential.findOne({
@@ -119,7 +119,7 @@ exports.updatePersonnel = async (req,res)=>{
 }
 
 
-exports.deletePersonnel = async(req,res)=>{
+exports.deleteStudent = async(req,res)=>{
   try{
     const {userId} = req.params;
     const isUserExist = await User.findOne({
@@ -128,7 +128,7 @@ exports.deletePersonnel = async(req,res)=>{
       }
     })
 
-    if(!isUserExist) return res.status(404).json({ message: "Personnel not found!" });
+    if(!isUserExist) return res.status(404).json({ message: "Student not found!" });
 
     isUserExist.destroy()
 
@@ -139,11 +139,11 @@ exports.deletePersonnel = async(req,res)=>{
   }
 }
 
-exports.importPersonnel = async(req,res)=>{
+exports.importStudent = async(req,res)=>{
   try{
-    const personnels = req.body
-    personnels.map(async(personnel)=>{
-      const {faculty,email,status,...rest} = personnel
+    const students = req.body
+    students.map(async(student)=>{
+      const {faculty,email,status,...rest} = student
 
       const isValidEmail = validateEmail(email)
       if(!isValidEmail) return
@@ -173,7 +173,7 @@ exports.importPersonnel = async(req,res)=>{
         status:tempStatus[stat] ? tempStatus[stat]  : false ,
         email:email,
         password:'12345',
-        role:'personnel'
+        role:'student'
       })
 
       await UserCredential.create({
