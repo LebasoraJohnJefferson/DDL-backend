@@ -1,5 +1,13 @@
 ### gmail account ###
 
-email:ddl0rg2024
-password:#ddlSupportTeam2024
-email-password-sender = iujojhqtlwzoixsl
+email:dllcas2024@gmail.com
+password:@Dll2024
+email-password-sender = hhmpvifkdbrkkotr
+
+
+### cloudinary account => use gmail account to login
+
+### cloudinary api credintials
+CLOUDINARY_CLOUD_NAME=dlirpqwkz
+CLOUDINARY_API_KEY=557665338495733
+CLOUDINARY_API_SECRET=Ke_QBpiLoHClyFivFcPp76gD5BY
