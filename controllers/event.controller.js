@@ -10,7 +10,7 @@ exports.createEvent = async (req, res) => {
     try {
         const {id} = req.credentials
         const {images,...rest} = req.body
-        const {title,description,link} = rest
+        const {title,description} = rest
         
         if(!title) res.status(409).json({message:'Title is required!'})
         if(!description) res.status(409).json({message:'Description is required!'})
