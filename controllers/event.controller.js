@@ -62,3 +62,25 @@ exports.getEvent = async (req,res)=>{
         console.log(error);
     }
 }
+
+
+exports.deleteEvent = async (req,res)=>{
+    const {eventId} = req.params;
+    const isEventExist = await Event.findOne({
+        where:{
+            id:eventId
+        }
+    })
+
+    if(!isEventExist) return res.status(404).json({message:"Event not found!"})
+
+    await isEventExist.destroy()
+
+    res.status(204).json({message:'Event successfully delted!'})
+
+    try{
+
+    }catch(e){
+        console.log(e);
+    }
+}
