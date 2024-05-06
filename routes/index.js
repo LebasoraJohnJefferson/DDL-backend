@@ -9,6 +9,8 @@ const AdminControlPersonnel = require("./adminControlPersonnel")
 const AdminControlStudent = require("./adminControlStudent")
 const Course = require("./course")
 const Event = require("./eventControlAdmin")
+const User = require("./user")
+const Faculty = require("./faculty")
 
 
 router.use("/auth",Auth);
@@ -17,5 +19,7 @@ router.use("/admin",verifyToken,isAdmin, Admin);
 router.use("/admin/personnel",verifyToken,AdminControlPersonnel)
 router.use("/admin/student",verifyToken,AdminControlStudent)
 router.use("/admin/event",verifyToken,Event)
+router.use("/admin/users",verifyToken,User)
+router.use("/admin/faculty",verifyToken,Faculty)
 
 module.exports = router;

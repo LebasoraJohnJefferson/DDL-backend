@@ -14,6 +14,7 @@ module.exports = (sequelize, DataTypes) => {
       // define association here
       User.hasOne(models.UserCredential, {foreignKey: 'userId'});
       User.hasOne(models.Event, {foreignKey: 'userId'})
+      User.hasOne(models.Faculty, {foreignKey: 'userId'})
     }
   }
 
