@@ -18,6 +18,10 @@ module.exports = {
           key: "id",
         },
       },
+      isCoor:{
+        type:Sequelize.BOOLEAN,
+        defaultValue:false,
+      },
       role:{
         type: Sequelize.STRING
       },

@@ -16,6 +16,7 @@ module.exports = (sequelize, DataTypes) => {
     {
         userId: DataTypes.INTEGER,
         role:DataTypes.STRING,
+        isCoor:DataTypes.BOOLEAN,
         description: {
             type: DataTypes.TEXT,
             allowNull: true,
