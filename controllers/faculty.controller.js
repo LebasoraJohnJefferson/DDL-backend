@@ -35,6 +35,7 @@ const {
 
   exports.getFaculty = async(req,res)=>{
     try{
+      let couter = 0
       const defaultImage = '/assets/images/ddl-logo.png'
       const superior = await Faculty.findAll({
         include: [
@@ -59,6 +60,7 @@ const {
       }
       const supIndex = []
       const formattedSuperior = []
+      let headId = null;
       Object.keys(position).map((keys,index)=>{
         superior.map((data)=>{
           if(data?.role == keys){
@@ -67,25 +69,160 @@ const {
             let role = position[data?.role] ? position[data?.role] : data?.role
             supIndex.push(data?.id)
             let pid = index !=0 ? supIndex[index-1] : 0
+            if(keys=='Head') headId = data?.id;
             formattedSuperior.push({name:name,id:data?.id,image:image,role:role,pid:pid})
             return
           }
         })
         delete position[keys]
       })
+
+
+      const coordinators = await Faculty.findAll({
+        include: [
+          {
+            model: User,
+            attributes:{exclude:['password']},
+            include:[
+              {
+                model:UserCredential,
+                include:[
+                  {
+                    model:Course
+                  }
+                ]
+              }
+            ]
+          },
+        ],
+        where:{
+          role:{
+            [Op.not]:['President','Vice President','Dean','Head'],
+          },
+          isCoor:true
+        }
+      })
+
+      let BSFcoor = []
+      let BAELcoor = []
+
+      const formattedCoor = coordinators.map((data)=>{
+        let name = `${data?.User?.firstName} ${ data?.User?.middleName ? data?.User?.middleName[0] : ''} ${data?.User?.lastName}, ${data?.extension}`
+        let image = data?.User?.image ? data?.User?.image : defaultImage
+        if(data?.User?.UserCredential?.Course?.acronym === 'BSF'){
+          BSFcoor.push(data?.id)
+        }else{
+          BAELcoor.push(data?.id)
+        }
+        return {name:name,id:data?.id,image:image,role:data?.role,pid:headId,subRole:`${data?.User?.UserCredential?.Course?.acronym} Program Coordinator`}
+      })
+
+      const BAELmembers = await Faculty.findAll({
+        include: [
+          {
+            model: User,
+            attributes:{exclude:['password']},
+            include:[
+              {
+                model:UserCredential,
+                include:[
+                  {
+                    model:Course,
+                  }
+                ]
+              }
+            ]
+          },
+        ],
+        where:{
+          '$User.UserCredential.Course.acronym$':'BAEL',
+          role:{
+            [Op.not]:['President','Vice President','Dean','Head'],
+          },
+          isCoor:false
+        }
+      })
+
+
+      let formattedBAELMember = []
+      if(BAELcoor){
+        let pid= null
+        let count = 0
+        let tempCoor = [...BAELcoor,...BAELcoor]
+        let replaceCoor = []
+        formattedBAELMember =  BAELmembers.map((data)=>{
+          if(count >= tempCoor.length){
+            tempCoor = replaceCoor
+            count=0
+          }
+          replaceCoor.push(data?.id)
+          pid = tempCoor[count]
+          count++
+          
+          let name = `${data?.User?.firstName} ${ data?.User?.middleName ? data?.User?.middleName[0] : ''} ${data?.User?.lastName}, ${data?.extension}`
+          let image = data?.User?.image ? data?.User?.image : defaultImage
+          return {name:name,id:data?.id,image:image,role:data?.role,pid:pid}
+        })
+      }
+
+
+
+
+      const BSFmembers = await Faculty.findAll({
+        include: [
+          {
+            model: User,
+            attributes:{exclude:['password']},
+            include:[
+              {
+                model:UserCredential,
+                include:[
+                  {
+                    model:Course,
+                  }
+                ]
+              }
+            ]
+          },
+        ],
+        where:{
+          '$User.UserCredential.Course.acronym$':'BSF',
+          role:{
+            [Op.not]:['President','Vice President','Dean','Head'],
+          },
+          isCoor:false
+        }
+      })
+
+
       
+      let formattedBSFMember = []
+      if(BSFcoor){
+        let pidBSF= null
+        let countBSF = 0
+        let tempCoorBSF = [...BSFcoor,...BSFcoor]
+        let replaceCoorBSF = []
+        formattedBSFMember =  BSFmembers.map((data)=>{
+          if(countBSF >= tempCoorBSF.length){
+            tempCoorBSF = replaceCoorBSF
+            countBSF=0
+          }
+          replaceCoorBSF.push(data?.id)
+          pidBSF = tempCoorBSF[countBSF]
+          countBSF++
+          
+          let nameBSF = `${data?.User?.firstName} ${ data?.User?.middleName ? data?.User?.middleName[0] : ''} ${data?.User?.lastName}, ${data?.extension}`
+          let imageBSF = data?.User?.image ? data?.User?.image : defaultImage
+          return {name:nameBSF,id:data?.id,image:imageBSF,role:data?.role,pid:pidBSF}
+        })
+      }
 
-      // const superior = members.map((data,index)=>{
-      //   let name = `${data?.User?.firstName} ${ data?.User?.middleName ? data?.User?.middleName[0] : ''} ${data?.User?.lastName}, ${data?.extension}`
-      //   let image = data?.User?.image ? data?.User?.image : defaultImage
-      //   let role = position[data?.role] ? position[data?.role] : data?.role
-      //   return {name:name,id:data?.id,image:image,role:role}
-      // })
 
 
+      const newData = [...formattedSuperior,...formattedCoor,...formattedBAELMember,...formattedBSFMember]
 
       res.status(200).send(
-        {members:formattedSuperior}
+        {members:newData}
       )
 
 
