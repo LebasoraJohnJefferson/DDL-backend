@@ -95,7 +95,8 @@ const {
             supIndex.push(data?.id)
             let pid = index !=0 ? supIndex[index-1] : 0
             if(keys=='Head') headId = data?.id;
-            formattedSuperior.push({name:name,id:data?.id,image:image,role:role,pid:pid})
+            let description = data?.description ? data?.description : null
+            formattedSuperior.push({description:description,name:name,id:data?.id,image:image,role:role,pid:pid})
             return
           }
         })
@@ -134,12 +135,13 @@ const {
       const formattedCoor = coordinators.map((data)=>{
         let name = `${data?.User?.firstName} ${ data?.User?.middleName ? data?.User?.middleName[0] : ''} ${data?.User?.lastName}, ${data?.extension}`
         let image = data?.User?.image ? data?.User?.image : defaultImage
+        let description = data?.description ? data?.description : null
         if(data?.User?.UserCredential?.Course?.acronym === 'BSF'){
           BSFcoor.push(data?.id)
         }else{
           BAELcoor.push(data?.id)
         }
-        return {name:name,id:data?.id,image:image,role:data?.role,pid:headId,subRole:`${data?.User?.UserCredential?.Course?.acronym} Program Coordinator`}
+        return {description:description,name:name,id:data?.id,image:image,role:data?.role,pid:headId,subRole:`${data?.User?.UserCredential?.Course?.acronym} Program Coordinator`}
       })
 
       const BAELmembers = await Faculty.findAll({
@@ -183,10 +185,10 @@ const {
           replaceCoor.push(data?.id)
           pid = tempCoor[count]
           count++
-          
+          let description = data?.description ? data?.description : null
           let name = `${data?.User?.firstName} ${ data?.User?.middleName ? data?.User?.middleName[0] : ''} ${data?.User?.lastName}, ${data?.extension}`
           let image = data?.User?.image ? data?.User?.image : defaultImage
-          return {name:name,id:data?.id,image:image,role:data?.role,pid:pid}
+          return {description:description,name:name,id:data?.id,image:image,role:data?.role,pid:pid}
         })
       }
 
@@ -235,10 +237,10 @@ const {
           replaceCoorBSF.push(data?.id)
           pidBSF = tempCoorBSF[countBSF]
           countBSF++
-          
+          let description = data?.description ? data?.description : null
           let nameBSF = `${data?.User?.firstName} ${ data?.User?.middleName ? data?.User?.middleName[0] : ''} ${data?.User?.lastName}, ${data?.extension}`
           let imageBSF = data?.User?.image ? data?.User?.image : defaultImage
-          return {name:nameBSF,id:data?.id,image:imageBSF,role:data?.role,pid:pidBSF}
+          return {description:description,name:nameBSF,id:data?.id,image:imageBSF,role:data?.role,pid:pidBSF}
         })
       }
 
