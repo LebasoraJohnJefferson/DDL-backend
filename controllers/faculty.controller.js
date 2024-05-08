@@ -5,6 +5,31 @@ const {
 
 
 
+  exports.getFaculty = async (req,res)=>{
+    try {
+        const facultyMembers = await Faculty.findAll({
+          include: [
+            {
+              model: User,
+              attributes:{exclude:['password']}
+            },
+          ],
+        })
+
+        const formattedData = facultyMembers.map((data)=>{
+          let fullName = `${data?.User?.firstName} ${data?.User?.middleName ? data?.User?.middleName[0] : ''} ${data?.User.lastName} ${data?.User?.suffix ?  data?.User?.suffix : ''}`
+          let isCoor = data?.isCoor ? 'Yes' : 'No'
+          return {role:data?.role,extension:data?.extension,id:data?.id,fullName:fullName,isCoor:isCoor}
+        })
+
+
+        res.status(200).json({facultyMembers:formattedData})
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
+
   exports.getUnassignedFacultyMember = async (req,res)=>{
     try{
       const users= await User.findAll({
@@ -33,7 +58,7 @@ const {
     }
   }
 
-  exports.getFaculty = async(req,res)=>{
+  exports.getFacultyChart = async(req,res)=>{
     try{
       let couter = 0
       const defaultImage = '/assets/images/ddl-logo.png'
@@ -249,4 +274,29 @@ const {
     }catch(e){
         console.log(e);
     }
-}
+  }
+
+  exports.deleteFaculty = async (req,res)=>{
+    try {
+      const {facultyId} = req.params
+
+
+      const isExist = await Faculty.findOne({
+        where:{
+          id:facultyId
+        }
+      })
+
+      if(!isExist) return res.status(404).json({message:'Faculty Member not Found!'})
+
+      await isExist.destroy()
+
+      return res.status(204).json({
+        message:'Successfully deleted'
+      })
+
+
+    } catch (error) {
+      console.log(error)
+    }
+  }
