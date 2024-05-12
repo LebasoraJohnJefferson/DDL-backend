@@ -5,7 +5,7 @@ const {
     getStudentOrg,
     deleteStudentOrgMember,
     getStudentWithNoRole
-} = require("../controllers/baelStudentChart.controller");
+} = require("../controllers/bsfStudentChart.controller");
 const {isAdmin} = require("../middlewares/checkRole")
 
 

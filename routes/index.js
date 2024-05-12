@@ -12,6 +12,7 @@ const Event = require("./eventControlAdmin")
 const User = require("./user")
 const Faculty = require("./faculty")
 const BaelChart = require("./baelStudentChart")
+const bsfChart = require("./bsfStudentChart")
 
 
 router.use("/auth",Auth);
@@ -23,5 +24,6 @@ router.use("/admin/event",verifyToken,Event)
 router.use("/admin/users",verifyToken,User)
 router.use("/admin/faculty",verifyToken,Faculty)
 router.use("/admin/baelChart",BaelChart)
+router.use("/admin/bsfChart",bsfChart)
 
 module.exports = router;

@@ -16,6 +16,7 @@ module.exports = (sequelize, DataTypes) => {
       User.hasOne(models.Event, {foreignKey: 'userId'})
       User.hasOne(models.Faculty, {foreignKey: 'userId'})
       User.hasOne(models.BaelStudentChart, {foreignKey: 'userId'})
+      User.hasOne(models.BsfStudentChart, {foreignKey: 'userId'})
     }
   }
 
