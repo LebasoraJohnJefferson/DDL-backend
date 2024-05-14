@@ -73,6 +73,7 @@ exports.getStudentOrg = async (req,res)=>{
                 attributes:{exclude:['password']}
               },
             ],
+            order: [['createdAt', 'DESC']]
           })
 
           const formattedData = orgDetails.map((data)=>{

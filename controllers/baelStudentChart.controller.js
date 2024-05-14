@@ -73,6 +73,7 @@ exports.getStudentOrg = async (req,res)=>{
                 attributes:{exclude:['password']}
               },
             ],
+            order: [['createdAt', 'DESC']]
           })
 
           const formattedData = orgDetails.map((data)=>{
@@ -114,3 +115,152 @@ exports.deleteStudentOrgMember = async (req,res)=>{
       console.log(error)
     }
   }
+
+
+exports.getBaelChart = async (req,res)=>{
+  try {
+
+    const coor = await BaelStudentChart.findAll({
+      include:{
+        model:User,
+        attributes:{exclude:['password']}
+      },
+      where:{
+        role:'ELSoc Adviser'
+      }
+    })
+
+
+
+    const info = []
+    if(coor.length > 1){
+      let count = 0
+      coor.map((data,index)=>{
+        let format = {}
+        let pids  = null
+        if(count < coor.length-1){
+          format= dataFormatted(data)
+          pids = coor[index+1].id
+        }else{
+          format = dataFormatted(data)
+          pids = coor[0].id
+        }
+        info.push({...format,pids:[pids]})
+        count++
+      })
+    }
+
+    const president = await BaelStudentChart.findOne({
+      include:{
+        model:User,
+        attributes:{exclude:['password']}
+      },
+      where:{
+        role:'President'
+      }
+    })
+
+    let formattedPresident =null
+    if(president) formattedPresident = dataFormatted(president)
+    if(coor.length > 1){
+      info.push({...formattedPresident,mid:[coor[0].id],fid:[coor[1].id]})
+    }else if(coor.length == 1){
+      info.push({...formattedPresident,mid:[coor[0].id]})
+    }
+
+    const vicePresident = await BaelStudentChart.findOne({
+      include:{
+        model:User,
+        attributes:{exclude:['password']}
+      },
+      where:{
+        role:'Vice President'
+      }
+    })
+    let formattedVicePresident = null
+    if(vicePresident) formattedVicePresident = dataFormatted(vicePresident)
+    if(formattedPresident.length!=0){
+      info.push({...formattedVicePresident,mid:formattedPresident?.id})
+    }
+
+    const anySecretary = await BaelStudentChart.findAll({
+      include:{
+        model:User,
+        attributes:{exclude:['password']}
+      },
+      where:{
+        role:{
+          [Op.in]:['Secretary','Assistant Secretary']
+        }
+      }
+    })
+
+    if(vicePresident){
+      anySecretary.map((data)=>{
+        let formattedAnySecretary = dataFormatted(data)
+        info.push({...formattedAnySecretary,mid:vicePresident?.id})
+      })
+    }
+
+    const Treasurer = await BaelStudentChart.findAll({
+      include:{
+        model:User,
+        attributes:{exclude:['password']}
+      },
+      where:{
+        role:{
+          [Op.in]:['Treasurer','Assistant Treasurer']
+        }
+      }
+    })
+
+    if(anySecretary.length != 0){
+      Treasurer.map((data,index)=>{
+        let pids = null
+        let formattedAnyTreasurer = dataFormatted(data)
+        let mid = index > anySecretary.length ? anySecretary[0]?.id : anySecretary[index]?.id 
+        if(anySecretary.length == 1) pids = anySecretary[0]?.id;
+        info.push({...formattedAnyTreasurer,mid:mid,pids:[pids]})
+      })
+    }
+
+    const APBcategory = await BaelStudentChart.findAll({
+      include:{
+        model:User,
+        attributes:{exclude:['password']}
+      },
+      where:{
+        role:{
+          [Op.in]:['Head Business & Project Committee','Auditor','Public Information Officer (PIO)']
+        }
+      }
+    })
+
+    if(Treasurer.length != 0){
+      APBcategory.map((data,index)=>{
+        let formattedAPBcategory = dataFormatted(data)
+        let mid = null
+        let fid = null
+        if(index == 0 || index+1 == APBcategory.length){
+            mid = index == 0 ? Treasurer[0]?.id : Treasurer[Treasurer.length-1]?.id
+        }else{
+          mid = Treasurer.length == 1 ? Treasurer[index]?.id : Treasurer[0]?.id
+        }
+        info.push({...formattedAPBcategory,mid:mid,fid:fid})
+      })
+    }
+
+    res.status(200).json({members:info})
+  } catch (error) { 
+    console.log(error)
+  }
+}
+
+
+const dataFormatted = (data)=>{
+  const defaultImage = '/assets/images/ddl-logo.png'
+  let name = `${data?.User?.firstName} ${ data?.User?.middleName ? data?.User?.middleName[0] : ''} ${data?.User?.lastName} ${data?.extension ? ", " + data?.extension : ''}`
+  let image = data?.User?.image ? data?.User?.image : defaultImage
+  let description = data?.description ? data?.description : null
+  return {gender:'male',description:description,name:name,id:data?.id,image:image,role:data?.role}
+}
