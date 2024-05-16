@@ -244,9 +244,51 @@ exports.getBaelChart = async (req,res)=>{
         if(index == 0 || index+1 == APBcategory.length){
             mid = index == 0 ? Treasurer[0]?.id : Treasurer[Treasurer.length-1]?.id
         }else{
-          mid = Treasurer.length == 1 ? Treasurer[index]?.id : Treasurer[0]?.id
+            mid = Treasurer.length == 1 ? Treasurer[index]?.id : Treasurer[0]?.id
         }
         info.push({...formattedAPBcategory,mid:mid,fid:fid})
+      })
+    }
+
+
+    const representative = await BaelStudentChart.findAll({
+      include:{
+        model:User,
+        attributes:{exclude:['password']}
+      },
+      where:{
+        role:{
+          [Op.in]:[
+            '1st Year Representative',
+            '2nd Year Representative',
+            '3rd Year Representative',
+            '4th Year Representative',
+          ]
+        }
+      }
+    })
+
+    if(APBcategory){
+        let temp = 0
+      representative.map((data,index)=>{
+        let mid = null
+        let formattedRepresentative = dataFormatted(data)
+        if(index == 0 || index == APBcategory.length-1){
+          mid = index == 0 ? APBcategory[0]?.id : APBcategory[APBcategory.length-1]?.id;
+        }else{
+          if(APBcategory.length == 2){
+            mid = APBcategory[1]?.id
+          }else{
+            if(APBcategory.length>2){
+              if(APBcategory[index]) temp = index
+              mid = APBcategory[temp]?.id
+            }else{
+              mid = APBcategory[0]?.id
+            }
+          }
+         
+        }
+        info.push({...formattedRepresentative,mid:mid})
       })
     }
 
