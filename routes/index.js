@@ -13,17 +13,19 @@ const User = require("./user")
 const Faculty = require("./faculty")
 const BaelChart = require("./baelStudentChart")
 const bsfChart = require("./bsfStudentChart")
+const visitors = require("./visitors")
 
 
 router.use("/auth",Auth);
-router.use("/course",verifyToken,Course)
-router.use("/admin",verifyToken,isAdmin, Admin);
-router.use("/admin/personnel",verifyToken,AdminControlPersonnel)
-router.use("/admin/student",verifyToken,AdminControlStudent)
-router.use("/admin/event",verifyToken,Event)
-router.use("/admin/users",verifyToken,User)
-router.use("/admin/faculty",verifyToken,Faculty)
-router.use("/admin/baelChart",BaelChart)
-router.use("/admin/bsfChart",bsfChart)
+router.use("/course",verifyToken,isAdmin,Course)
+router.use("/admin",verifyToken, Admin);
+router.use("/admin/personnel",verifyToken,isAdmin,AdminControlPersonnel)
+router.use("/admin/student",verifyToken,isAdmin,AdminControlStudent)
+router.use("/admin/event",verifyToken,isAdmin,Event)
+router.use("/admin/users",verifyToken,isAdmin,User)
+router.use("/admin/faculty",verifyToken,isAdmin,Faculty)
+router.use("/admin/baelChart",verifyToken,isAdmin,BaelChart)
+router.use("/admin/bsfChart",verifyToken,isAdmin,bsfChart)
+router.use("/",visitors)
 
 module.exports = router;

@@ -6,12 +6,11 @@ const {
     updatePersonnel,
     importPersonnel
 } = require("../controllers/personnel.controller")
-const {isAdmin} = require("../middlewares/checkRole")
 
-router.post("/" ,isAdmin,createPersonnel);
-router.get("/" ,isAdmin,getPersonnel);
-router.delete("/:userId" ,isAdmin,deletePersonnel);
-router.put("/:userId" ,isAdmin,updatePersonnel);
-router.post("/importPersonnel",isAdmin,importPersonnel)
+router.post("/" ,createPersonnel);
+router.get("/" ,getPersonnel);
+router.delete("/:userId" ,deletePersonnel);
+router.put("/:userId" ,updatePersonnel);
+router.post("/importPersonnel",importPersonnel)
 
 module.exports = router;

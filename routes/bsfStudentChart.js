@@ -13,7 +13,7 @@ const {isAdmin} = require("../middlewares/checkRole")
 router.post("/", verifyToken,isAdmin,createStudentChart);
 router.get("/getUnassignedBAELStudent", verifyToken,isAdmin,getStudentWithNoRole);
 router.get("/", verifyToken,isAdmin,getStudentOrg);
-router.get("/chart", verifyToken,isAdmin,getBsfChart);
+router.get("/chart",getBsfChart);
 router.delete("/:userId", verifyToken,isAdmin,deleteStudentOrgMember);
 
 module.exports = router;

@@ -4,10 +4,9 @@ const {
     getEvent,
     deleteEvent
 } = require("../controllers/event.controller")
-const {isAdmin} = require("../middlewares/checkRole")
 
-router.post("/" ,isAdmin,createEvent);
-router.get("/" ,isAdmin,getEvent);
-router.delete("/:eventId",isAdmin,deleteEvent)
+router.post("/" ,createEvent);
+router.get("/" ,getEvent);
+router.delete("/:eventId",deleteEvent)
 
 module.exports = router;

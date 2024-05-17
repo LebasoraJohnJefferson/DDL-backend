@@ -119,7 +119,6 @@ exports.deleteStudentOrgMember = async (req,res)=>{
 
 exports.getBaelChart = async (req,res)=>{
   try {
-
     const coor = await BaelStudentChart.findAll({
       include:{
         model:User,
