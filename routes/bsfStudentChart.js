@@ -4,7 +4,8 @@ const {
     createStudentChart,
     getStudentOrg,
     deleteStudentOrgMember,
-    getStudentWithNoRole
+    getStudentWithNoRole,
+    getBsfChart
 } = require("../controllers/bsfStudentChart.controller");
 const {isAdmin} = require("../middlewares/checkRole")
 
@@ -12,6 +13,7 @@ const {isAdmin} = require("../middlewares/checkRole")
 router.post("/", verifyToken,isAdmin,createStudentChart);
 router.get("/getUnassignedBAELStudent", verifyToken,isAdmin,getStudentWithNoRole);
 router.get("/", verifyToken,isAdmin,getStudentOrg);
+router.get("/chart", verifyToken,isAdmin,getBsfChart);
 router.delete("/:userId", verifyToken,isAdmin,deleteStudentOrgMember);
 
 module.exports = router;
