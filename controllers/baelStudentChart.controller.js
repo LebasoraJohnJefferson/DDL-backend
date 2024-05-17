@@ -162,7 +162,7 @@ exports.getBaelChart = async (req,res)=>{
 
     let formattedPresident =null
     if(president) formattedPresident = dataFormatted(president)
-    if(coor.length > 1){
+    if(coor.length > 1 && president){
       info.push({...formattedPresident,mid:[coor[0].id],fid:[coor[1].id]})
     }else if(coor.length == 1){
       info.push({...formattedPresident,mid:[coor[0].id]})
@@ -179,7 +179,7 @@ exports.getBaelChart = async (req,res)=>{
     })
     let formattedVicePresident = null
     if(vicePresident) formattedVicePresident = dataFormatted(vicePresident)
-    if(formattedPresident.length!=0){
+    if(formattedPresident.length!=0 && vicePresident){
       info.push({...formattedVicePresident,mid:formattedPresident?.id})
     }
 

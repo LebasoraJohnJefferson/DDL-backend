@@ -119,8 +119,140 @@ exports.deleteStudentOrgMember = async (req,res)=>{
 
   exports.getBsfChart = async (req,res)=>{
     try {
-      res.status(200).json({members:[]})
+      let format =null
+      const coor = await BsfStudentChart.findAll({
+        include:{
+          model:User,
+          attributes:{exclude:['password']}
+        },
+        where:{
+          role:'Tagapayo'
+        }
+      })
+
+  
+      const info = []
+      if(coor.length > 1){
+        let count = 0
+        coor.map((data,index)=>{
+          let format = {}
+          let pids  = null
+          if(count < coor.length-1){
+            format= dataFormatted(data)
+            pids = coor[index+1].id
+          }else{
+            format = dataFormatted(data)
+            pids = coor[0].id
+          }
+          info.push({...format,pids:[pids]})
+          count++
+        })
+      }
+
+      const pangulo = await BsfStudentChart.findOne({
+        include:{
+          model:User,
+          attributes:{exclude:['password']}
+        },
+        where:{
+          role:'Pangulo'
+        }
+      })
+
+      if(pangulo) format = dataFormatted(pangulo)
+      if(coor.length > 1 && pangulo){
+        info.push({...format,mid:[coor[0].id],fid:[coor[1].id]})
+      }else if(coor.length == 1){
+        info.push({...format,mid:[coor[0].id]})
+      }
+
+      const pangalawangLayer = await BsfStudentChart.findAll({
+        include:{
+          model:User,
+          attributes:{exclude:['password']}
+        },
+        where:{
+          role:{
+            [Op.in]:['Pangalawang Pangulo','Kalihim','Ingat-yaman','Tagasuri']
+          }
+        }
+      })
+
+
+      if(pangulo.length!=0){
+        pangalawangLayer.map((data)=>{
+          format = dataFormatted(data)
+          info.push({...format,mid:pangulo?.id})
+        })
+      }
+
+      const pangatlongLayer = await BsfStudentChart.findAll({
+        include:{
+          model:User,
+          attributes:{exclude:['password']}
+        },
+        where:{
+          role:{
+            [Op.in]:['Business Chairperson','Tagapamalita','Lakambini','Lakandiwa']
+          }
+        }
+      })
+
+      if(pangalawangLayer.length!=0){
+        pangatlongLayer.map((data,index)=>{
+          format = dataFormatted(data)
+          let assignedIndex = index == pangalawangLayer.length-1 ? pangalawangLayer.length-1 : index
+          info.push({...format,mid:pangalawangLayer[assignedIndex]?.id})
+        })
+      }
+
+      const pangataptLayer = await BsfStudentChart.findAll({
+        include:{
+          model:User,
+          attributes:{exclude:['password']}
+        },
+        where:{
+          role:{
+            [Op.in]:['Kinatawan ng 1st Year','Kinatawan ng 2nd Year','Kinatawan ng 3rd Year','Kinatawan ng 4th Year']
+          }
+        }
+      })
+
+      if(pangatlongLayer.length!=0){
+        pangataptLayer.map((data,index)=>{
+          format = dataFormatted(data)
+          let assignedIndex = index == pangatlongLayer.length-1 ? pangatlongLayer.length-1 : index
+          info.push({...format,mid:pangatlongLayer[assignedIndex]?.id})
+        })
+      }
+
+      const huliLayer = await BsfStudentChart.findOne({
+        include:{
+          model:User,
+          attributes:{exclude:['password']}
+        },
+        where:{
+          role:'Kawaksing Kalihim'
+        }
+      })
+
+      if(huliLayer && pangataptLayer){
+        format = dataFormatted(huliLayer)
+        info.push({...format,mid:pangataptLayer[0]?.id})
+      }
+
+
+      res.status(200).json({members:info})
     } catch (error) {
-      console.log(err)
+      console.log(error)
     }
+  }
+
+
+  const dataFormatted = (data)=>{
+    const defaultImage = '/assets/images/ddl-logo.png'
+    let name = `${data?.User?.firstName} ${ data?.User?.middleName ? data?.User?.middleName[0] : ''} ${data?.User?.lastName} ${data?.extension ? ", " + data?.extension : ''}`
+    let image = data?.User?.image ? data?.User?.image : defaultImage
+    let description = data?.description ? data?.description : null
+    return {gender:'female',description:description,name:name,id:data?.id,image:image,role:data?.role}
   }
