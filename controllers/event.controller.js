@@ -84,3 +84,38 @@ exports.deleteEvent = async (req,res)=>{
         console.log(e);
     }
 }
+
+exports.publicEvents =async (req,res)=>{
+    try {
+        const events = await Event.findAll({
+            include: [
+                {model: EventImages},
+                {
+                    model: User,
+                    attributes:{exclude:['password']},
+                },
+            ],
+            where:{
+                privacy:'All'
+            },
+            order: [['createdAt', 'DESC']]
+        })
+        res.status(200).json({event:events})
+    } catch (error) {
+        console.log(error)
+    }
+}
+
+
+exports.publicImages = async (req,res)=>{
+    try {
+        const images = await EventImages.findAll({
+            order: [['createdAt', 'DESC']],
+            limit:10
+        })
+
+        res.status(200).send({images:images})
+    } catch (error) {
+        console.log(error)
+    }
+}
