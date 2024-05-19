@@ -37,6 +37,28 @@ exports.createPersonnel = async (req, res) => {
   }
 };
 
+
+exports.getSpecificPersonnel = async (req,res)=>{
+  try {
+    const { id, email } = req.credentials;
+    const user = await User.findOne({
+      where: {
+        id: id,
+        role: "personnel",
+      },
+      attributes: ["id", "firstName","middleName","lastName","suffix", "email", "image"],
+    });
+    
+    if (!user) return res.sendStatus(401);
+
+    res.status(200).send({ user: user });
+
+  } catch (error) {
+    console.log(error)
+  }
+}
+
+
 exports.getPersonnel = async (req,res)=>{
   try{
     const users= await User.findAll({

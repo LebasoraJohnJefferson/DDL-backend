@@ -1,7 +1,7 @@
 const router = require("express").Router();
 
 const {verifyToken} = require("../middlewares/generateToken")
-const {isAdmin} = require("../middlewares/checkRole")
+const {isAdmin,isPersonnel} = require("../middlewares/checkRole")
 
 const Auth = require("./auth")
 const Admin = require("./admin")
@@ -14,6 +14,7 @@ const Faculty = require("./faculty")
 const BaelChart = require("./baelStudentChart")
 const bsfChart = require("./bsfStudentChart")
 const visitors = require("./visitors")
+const personnel = require("./personnel")
 
 
 router.use("/auth",Auth);
@@ -26,6 +27,11 @@ router.use("/admin/users",verifyToken,isAdmin,User)
 router.use("/admin/faculty",verifyToken,isAdmin,Faculty)
 router.use("/admin/baelChart",verifyToken,isAdmin,BaelChart)
 router.use("/admin/bsfChart",verifyToken,isAdmin,bsfChart)
+
+
+router.use("/personnel",verifyToken,isPersonnel,personnel)
+
+
 router.use("/",visitors)
 
 module.exports = router;
