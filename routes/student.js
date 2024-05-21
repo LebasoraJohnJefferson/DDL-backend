@@ -1,11 +1,11 @@
 const router = require("express").Router();
 const {
-    getSpecificPersonnel,
+    getSpecificStudent,
     getEvent
-} = require("../controllers/personnel.controller")
+} = require("../controllers/student.controller")
 
 
-router.get("/" ,getSpecificPersonnel);
+router.get("/" ,getSpecificStudent);
 router.get("/event" ,getEvent);
 
 

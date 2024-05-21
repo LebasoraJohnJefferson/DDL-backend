@@ -1,7 +1,9 @@
 const {
     User,
     Course,
-    UserCredential
+    UserCredential,
+    EventImages,
+    Event
   } = require("../models");
   const { Op } = require('sequelize');
 
@@ -53,6 +55,29 @@ exports.getSpecificPersonnel = async (req,res)=>{
 
     res.status(200).send({ user: user });
 
+  } catch (error) {
+    console.log(error)
+  }
+}
+
+exports.getEvent = async (req,res)=>{
+  try {
+      const events = await Event.findAll({
+          include: [
+              {model: EventImages},
+              {
+                  model: User,
+                  attributes:{exclude:['password']},
+              },
+          ],
+          where:{
+              privacy:{
+                [Op.in]:['All','Teacher']
+              }
+          },
+          order: [['createdAt', 'DESC']]
+      })
+    res.status(200).json({event:events})
   } catch (error) {
     console.log(error)
   }
