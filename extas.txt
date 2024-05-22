@@ -5,6 +5,11 @@ password:@Dll2024
 email-password-sender = hhmpvifkdbrkkotr
 
 
+###github password####
+
+password:#DllOneEvsu2024
+
+
 ### cloudinary account => use gmail account to login
 
 ### cloudinary api credintials

@@ -15,11 +15,11 @@
       "dialect": "mysql"
     },
     "production": {
-      "username": "",
-      "password": "",
-      "database": "",
-      "host": "",
-      "port": 3306,
+      "username": "uoofkf119v436znu",
+      "password": "4IQqDDO5yIGN03oicLe",
+      "database": "bg92hpftdgvq5ws65t28",
+      "host": "bg92hpftdgvq5ws65t28-mysql.services.clever-cloud.com",
+      "port": 21160,
       "dialect": "mysql"
     }
   }
