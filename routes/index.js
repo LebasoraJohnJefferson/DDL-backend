@@ -16,6 +16,7 @@ const bsfChart = require("./bsfStudentChart")
 const visitors = require("./visitors")
 const personnel = require("./personnel")
 const student = require("./student")
+const globalUpdateProfile = require('./updateUserProfile')
 
 
 router.use("/auth",Auth);
@@ -32,7 +33,7 @@ router.use("/admin/bsfChart",verifyToken,isAdmin,bsfChart)
 
 router.use("/personnel",verifyToken,isPersonnel,personnel)
 router.use("/student",verifyToken,isStudent,student)
-
+router.use("/public/user",verifyToken,globalUpdateProfile)
 
 router.use("/",visitors)
 
