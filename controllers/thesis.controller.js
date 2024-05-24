@@ -41,7 +41,7 @@ exports.createThesis = async (req, res) => {
 
     
     await Thesis.create({...req.body,coverPhoto:imgRoute?.secure_url})
-    res.status(201).json({message: "test"})
+    res.status(201).json({message: "Successfully created!"})
   } catch (error) {
     console.log(error);
   }
@@ -82,6 +82,69 @@ exports.deleteThesis = async(req,res)=>{
     isThesisExist.destroy()
 
     res.sendStatus(204)
+
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+
+exports.updateThesis = async(req,res)=>{
+  try{
+    const {thesisId} = req.params;
+
+    const {courseId,adviser,title,coverPhoto} = req.body
+
+
+    const isCourseExist = await Course.findOne({
+      where:{
+        id:courseId
+      }
+    })
+
+    if(!isCourseExist) return res.status(404).send({message:"Program doesnt exist"})
+
+    const isAdviserExist = await User.findOne({
+      where:{id:adviser}
+    })
+    if(!isAdviserExist) return res.status(404).send({message:"Program doesnt exist"})
+    
+    const isThesisTitleExist = await Thesis.findOne({
+      where:{
+        title:title,
+        id:{
+          [Op.not]:thesisId
+        }
+      }
+    })
+
+    
+    if(isThesisTitleExist) return res.status(409).send({message:"Thesis already Exist"})
+        
+    let imgRoute =''
+    if (coverPhoto && coverPhoto.length > 0) {
+      try{
+          if(!coverPhoto.trim()) return
+          imgRoute = await cloudinary.uploader.upload(coverPhoto);
+      }catch(e){
+          console.log(e)
+      }
+    }
+
+
+    const isThesisExist = await Thesis.findOne({
+      where:{
+        id:thesisId
+      }
+    })
+
+
+    if(!isThesisExist) return res.status(404).json({ message: "Thesis not found!" });
+    const imgUrl = imgRoute ? imgRoute.secure_url : isThesisExist?.coverPhoto
+    await isThesisExist.update({...req.body,coverPhoto:imgUrl})
+
+
+    res.status(200).json({message:'Successfully updated!'})
 
   } catch (error) {
     console.log(error);
