@@ -10,6 +10,7 @@ module.exports = (sequelize, DataTypes) => {
     static associate(models) {
       // define association here
       Course.hasOne(models.UserCredential, {foreignKey: 'courseId'});
+      Course.hasOne(models.Thesis, {foreignKey: 'courseId'});
     }
   }
   Course.init(
