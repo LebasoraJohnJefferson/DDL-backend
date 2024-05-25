@@ -150,3 +150,16 @@ exports.updateThesis = async(req,res)=>{
     console.log(error);
   }
 }
+
+
+exports.importThesis = async(req,res)=>{
+  try{
+    const thesis = req.body
+    // personnels.map(async(personnel)=>{
+    //   const {faculty,email,status,...rest} = personnel
+    console.log(thesis)
+    res.status(404).send({message:'Successfully imported'})
+  } catch (error) {
+    console.log(error);
+  }
+}
