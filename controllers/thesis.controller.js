@@ -155,10 +155,45 @@ exports.updateThesis = async(req,res)=>{
 exports.importThesis = async(req,res)=>{
   try{
     const thesis = req.body
-    // personnels.map(async(personnel)=>{
-    //   const {faculty,email,status,...rest} = personnel
-    console.log(thesis)
-    res.status(404).send({message:'Successfully imported'})
+
+    const users = await User.findAll({
+      attributes: ['firstName','lastName','id'],
+      where:{
+        role:'personnel'
+      }
+    });
+
+
+    const importPromises = thesis.map(async (books) => {
+      const {adviser,course,title,authors,years,abstract} = books
+      const isCourseExist = await Course.findOne({
+        where:{
+          acronym:course ? course?.toUpperCase() :''
+        }
+      })
+
+      const isTitleExist = await Thesis.findOne({
+        where:{
+          title:title
+        }
+      })
+      
+      if(isTitleExist) return
+
+      if(!isCourseExist) return
+
+      const userId = users.map((user)=>{
+        if(adviser.includes(user?.firstName) && adviser.includes(user?.lastName)) return user?.id
+      })
+
+      if(!userId) return
+
+      await Thesis.create({...books,courseId:isCourseExist?.id,adviser:userId})
+    })
+
+    await Promise.all(importPromises);
+
+    res.status(201).send({message:'Successfully imported'})
   } catch (error) {
     console.log(error);
   }
