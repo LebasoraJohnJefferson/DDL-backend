@@ -4,6 +4,25 @@ const {
   const { Op } = require('sequelize');
   const { cloudinary } = require("../utils/cloudinary");
 
+exports.getLoginUser = async (req,res)=>{
+    try {
+        const {id} = req.credentials
+        const user = await User.findOne({
+            where:{
+                id:id
+            },
+            attributes:{exclude:['password']},
+        });
+
+        if(!user) return res.status(404).json({message:"User not found!"})
+
+        res.status(200).json({user:user})
+
+    } catch (error) {
+        console.log(error)
+    }
+}
+
 
 exports.getUser = async (req, res) => {
     try {

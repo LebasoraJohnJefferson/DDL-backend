@@ -48,7 +48,7 @@ exports.getSpecificPersonnel = async (req,res)=>{
         id: id,
         role: "personnel",
       },
-      attributes: ["id", "firstName","middleName","lastName","suffix", "email", "image"],
+      attributes: ["id","role", "firstName","middleName","lastName","suffix", "email", "image"],
     });
     
     if (!user) return res.sendStatus(401);

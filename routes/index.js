@@ -18,6 +18,7 @@ const personnel = require("./personnel")
 const student = require("./student")
 const globalUpdateProfile = require('./updateUserProfile')
 const thesis = require('./thesis')
+const globalThesis = require('./globalThesis')
 
 
 router.use("/auth",Auth);
@@ -35,6 +36,7 @@ router.use("/admin/thesis",verifyToken,isAdmin,thesis)
 
 router.use("/personnel",verifyToken,isPersonnel,personnel)
 router.use("/student",verifyToken,isStudent,student)
+router.use("/thesis",verifyToken,globalThesis)
 router.use("/public/user",verifyToken,globalUpdateProfile)
 
 router.use("/",visitors)

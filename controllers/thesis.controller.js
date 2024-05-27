@@ -1,7 +1,8 @@
 const {
     Thesis,
     Course,
-    User
+    User,
+    UserCredential
   } = require("../models");
   const { Op } = require('sequelize');
   const { cloudinary } = require("../utils/cloudinary");
@@ -49,18 +50,50 @@ exports.createThesis = async (req, res) => {
 
 exports.getThesis = async (req,res)=>{
   try{
-    
-    const thesis= await Thesis.findAll({
-      include: [
-        {
-          model: Course, 
-        },
-        {
-          model: User, 
-          attributes:{exclude:['password']},
-        },
-      ],
+    const {id} = req.credentials
+    const user = await User.findOne({
+      include:[{
+        model:UserCredential,
+        include:{
+          model:Course
+        }
+      }],
+      where:{
+        id:id
+      }
     })
+    let thesis={};
+    if(user?.role == 'student'){
+      thesis = await Thesis.findAll({
+        include: [
+          {
+            model: Course, 
+          },
+          {
+            model: User, 
+            attributes:{exclude:['password']},
+          },
+        ],
+        where:{
+          '$Course.id$':user?.UserCredential?.Course?.id
+        },
+        order: [['createdAt', 'DESC']]
+      })
+    }else{
+      thesis = await Thesis.findAll({
+        include: [
+          {
+            model: Course, 
+          },
+          {
+            model: User, 
+            attributes:{exclude:['password']},
+          },
+        ],
+        order: [['createdAt', 'DESC']]
+      })
+    }
+    
 
     res.status(200).json({thesis:thesis})
   } catch (error) {
