@@ -198,3 +198,32 @@ exports.importThesis = async(req,res)=>{
     console.log(error);
   }
 }
+
+exports.getSpecificThesis = async (req,res)=>{
+  try {
+    const {thesisId} = req.params;
+    const thesis = await Thesis.findOne({
+      where:{
+        id:thesisId
+      },
+      include: [
+        {
+          model: Course, 
+        },
+        {
+          model: User, 
+          attributes:{exclude:['password']},
+        },
+      ],
+    })
+
+    if(!thesis) return res.status(404).json({message:"Thesis not found!"})
+
+
+    res.status(200).json({
+      thesis:thesis
+    })
+  } catch (error) {
+    console.log(error)
+  }
+}
