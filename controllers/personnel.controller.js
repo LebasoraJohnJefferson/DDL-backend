@@ -364,6 +364,65 @@ exports.removeInvitation = async(req,res)=>{
 }
 
 
+exports.getUserWhoInvitedTheAuthUser = async(req,res)=>{
+  try {
+    const { id } = req.credentials;
+    const users = await SharedFile.findAll({
+      include:[{
+        model:File,
+        include:[{
+          model:User,
+          attributes:{exclude:['password']},
+        }]
+      }],
+      where:{
+        shareTo:id
+      },
+      group:['File.User.id']
+    })
+
+    res.status(200).json({users:users})
+  } catch (error) {
+    console.log(error)
+  }
+}
+
+
+exports.getSharedFiles = async(req,res)=>{
+  try {
+    const {userId} = req.params;
+    const { id } = req.credentials;
+
+    const isOwnerExist = await User.findOne({
+      where:{
+        id:userId
+      }
+    })
+
+    if(!isOwnerExist) return res.status(404).json({message:"Owner of the file not found!"})
+
+
+      const files = await SharedFile.findAll({
+        include:[{
+          model:File,
+          include:[{
+            model:User,
+            attributes:{exclude:['password']},
+          }]
+        }],
+        where:{
+          shareTo:id,
+          '$File.User.id$':userId
+        },
+      })
+
+    res.status(200).json({owner:isOwnerExist,files:files})
+  } catch (error) {
+    console.log(error)
+  }
+}
+
+
 const validateEmail = (email) => {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   return emailRegex.test(email);
