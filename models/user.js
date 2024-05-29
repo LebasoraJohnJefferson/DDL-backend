@@ -18,6 +18,9 @@ module.exports = (sequelize, DataTypes) => {
       User.hasOne(models.BaelStudentChart, {foreignKey: 'userId'})
       User.hasOne(models.BsfStudentChart, {foreignKey: 'userId'})
       User.hasOne(models.Thesis, {foreignKey: 'adviser'})
+      User.hasOne(models.File, {foreignKey: 'userId'})
+
+      User.hasMany(models.SharedFile, { foreignKey: 'shareTo' });
     }
   }
 

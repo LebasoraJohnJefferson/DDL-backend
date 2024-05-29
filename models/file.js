@@ -10,6 +10,7 @@ module.exports = (sequelize, DataTypes) => {
     static associate(models) {
       // define association here
       File.belongsTo(models.User);
+      File.hasOne(models.SharedFile, { foreignKey: 'fileId' });
     }
   }
   File.init(

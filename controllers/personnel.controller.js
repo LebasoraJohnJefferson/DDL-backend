@@ -3,7 +3,9 @@ const {
     Course,
     UserCredential,
     EventImages,
-    Event
+    Event,
+    SharedFile,
+    File
   } = require("../models");
   const { Op } = require('sequelize');
 
@@ -234,6 +236,130 @@ exports.importPersonnel = async(req,res)=>{
     res.status(201).send({message:'Successfully imported'})
   } catch (error) {
     console.log(error);
+  }
+}
+
+
+exports.getCoWorker = async(req,res)=>{
+  try {
+    const { id } = req.credentials;
+    const {fileId} = req.params;
+
+    const sharedFileUsers = await SharedFile.findAll({
+      attributes: ['shareTo'],
+      where: {
+        fileId: fileId, // Specify the fileId you are concerned with
+      },
+      raw: true,
+    });
+
+    const sharedUserIds = sharedFileUsers.map(sharedFile => sharedFile.shareTo);
+
+
+    const users = await User.findAll({
+      include:[{
+        model:SharedFile
+      }],
+      where: {
+        id:{
+          [Op.notIn]: sharedUserIds, 
+          [Op.not]: id,
+        },
+        role: "personnel",
+      },
+      attributes: ["id","role", "firstName","middleName","lastName","suffix", "email", "image"],
+    });
+
+    res.status(200).send({ users: users });
+
+  } catch (error) {
+    console.log(error)
+  }
+}
+
+
+exports.sharedFile = async(req,res)=>{
+  try {
+
+    const {fileId,shareTo} = req.body
+    const { id } = req.credentials;
+    
+    if(fileId == id) return res.status(409).json({message:"File Can't assigned to yourself!"})
+
+    const isPersonnelExist = await User.findOne({
+      where:{
+        id:shareTo
+      }
+    })
+
+    if(!isPersonnelExist) return res.status(404).json({message:"Co-work doens't exist!"})
+
+    const isFileExist = await File.findOne({
+      where:{
+        id:fileId
+      }
+    })
+
+    if(!isFileExist) return res.status(404).json({message:"File not found!"})
+
+    const isAlreadyInvited = await SharedFile.findOne({
+      where:{
+        fileId:fileId,
+        shareTo:shareTo
+      }
+    })
+
+    if(isAlreadyInvited) return res.status(404).json({message:"Co-work already invited!"})
+
+    await SharedFile.create({...req.body})
+
+    res.status(201).json({message:'Successfully invated!'})
+  } catch (error) {
+    console.log(error)
+  }
+}
+
+exports.getInviteCoWorker = async(req,res)=>{
+  try {
+    const {fileId} = req.params;
+
+    const invitedUser = await SharedFile.findAll({
+      include:[
+        {
+          model: User,
+          attributes:{exclude:['password']},
+        },
+      ],
+      where:{
+        fileId:fileId
+      }
+    })
+
+    res.status(200).json({users:invitedUser})
+
+
+  } catch (error) {
+    console.log(error)
+  }
+}
+
+exports.removeInvitation = async(req,res)=>{
+  try {
+    const {invitationId} = req.params;
+
+    const isInvitationExist = await SharedFile.findOne({
+      where:{
+        id:invitationId
+      }
+    })
+
+    if(!isInvitationExist) return res.status(404).json({message:"Co-worker not found!"})
+
+    await isInvitationExist.destroy()
+
+    res.status(204).json({message:"Successfully remove!"})
+  } catch (error) {
+    console.log(error)
   }
 }
 
