@@ -260,7 +260,7 @@ const {
 
 
   exports.postFaculty =  async (req,res)=>{
-    const {userId} = req.body;
+    const {userId,isCoor} = req.body;
 
     const isAlreadyAssigned = await Faculty.findOne({
       where:{
@@ -270,7 +270,9 @@ const {
 
     if(isAlreadyAssigned) return res.status(409).json({message:"User already assigned!"})
     
-    await Faculty.create(req.body)
+    const isCoorCheck = isCoor == null || isCoor == '' ? false : isCoor 
+
+    await Faculty.create({...req.body,isCoor:isCoorCheck})
     res.status(201).json({message:'Successfully Created!'})
     try{
     }catch(e){
