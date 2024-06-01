@@ -132,7 +132,7 @@ exports.deleteStudentOrgMember = async (req,res)=>{
 
   
       const info = []
-      if(coor.length > 1){
+      if(coor?.length > 1){
         let count = 0
         coor.map((data,index)=>{
           let format = {}
@@ -160,7 +160,7 @@ exports.deleteStudentOrgMember = async (req,res)=>{
       })
 
       if(pangulo) format = dataFormatted(pangulo)
-      if(coor.length > 1 && pangulo){
+      if(coor?.length > 1 && pangulo){
         info.push({...format,mid:[coor[0].id],fid:[coor[1].id]})
       }else if(coor.length == 1){
         info.push({...format,mid:[coor[0].id]})
@@ -179,7 +179,7 @@ exports.deleteStudentOrgMember = async (req,res)=>{
       })
 
 
-      if(pangulo.length!=0){
+      if(pangulo?.length!=0){
         pangalawangLayer.map((data)=>{
           format = dataFormatted(data)
           info.push({...format,mid:pangulo?.id})
@@ -198,7 +198,7 @@ exports.deleteStudentOrgMember = async (req,res)=>{
         }
       })
 
-      if(pangalawangLayer.length!=0){
+      if(pangalawangLayer?.length!=0){
         pangatlongLayer.map((data,index)=>{
           format = dataFormatted(data)
           let assignedIndex = index == pangalawangLayer.length-1 ? pangalawangLayer.length-1 : index
@@ -218,7 +218,7 @@ exports.deleteStudentOrgMember = async (req,res)=>{
         }
       })
 
-      if(pangatlongLayer.length!=0){
+      if(pangatlongLayer?.length!=0){
         pangataptLayer.map((data,index)=>{
           format = dataFormatted(data)
           let assignedIndex = index == pangatlongLayer.length-1 ? pangatlongLayer.length-1 : index

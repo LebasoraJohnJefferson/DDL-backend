@@ -132,7 +132,7 @@ exports.getBaelChart = async (req,res)=>{
 
 
     const info = []
-    if(coor.length > 1){
+    if(coor?.length > 1){
       let count = 0
       coor.map((data,index)=>{
         let format = {}
@@ -161,7 +161,7 @@ exports.getBaelChart = async (req,res)=>{
 
     let formattedPresident =null
     if(president) formattedPresident = dataFormatted(president)
-    if(coor.length > 1 && president){
+    if(coor?.length > 1 && president){
       info.push({...formattedPresident,mid:[coor[0].id],fid:[coor[1].id]})
     }else if(coor.length == 1){
       info.push({...formattedPresident,mid:[coor[0].id]})
@@ -213,7 +213,7 @@ exports.getBaelChart = async (req,res)=>{
       }
     })
 
-    if(anySecretary.length != 0){
+    if(anySecretary?.length != 0){
       Treasurer.map((data,index)=>{
         let pids = null
         let formattedAnyTreasurer = dataFormatted(data)
@@ -235,7 +235,7 @@ exports.getBaelChart = async (req,res)=>{
       }
     })
 
-    if(Treasurer.length != 0){
+    if(Treasurer?.length != 0){
       APBcategory.map((data,index)=>{
         let formattedAPBcategory = dataFormatted(data)
         let mid = null
