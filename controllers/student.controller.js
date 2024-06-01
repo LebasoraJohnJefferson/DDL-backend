@@ -24,7 +24,7 @@ exports.createStudent = async (req, res) => {
     let user = await User.create({
       ...req.body,
       password:trimmedPassword || defaultPassword,
-      status: status==null ? false : status,
+      status: status==null || status == '' ? false : status,
       role:"student",
     });
 
