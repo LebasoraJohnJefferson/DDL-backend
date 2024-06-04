@@ -81,7 +81,7 @@ const {
         "President":'SUC III President',
         "Vice President":'VP, Academic Affairs',
         "Dean":"College of Dean",
-        "Head":"Head, Department of Language and Literature"
+        "Head":"Head, Department of Languages and Literatures"
       }
       const supIndex = []
       const formattedSuperior = []
