@@ -132,16 +132,15 @@ const {
       let BSFcoor = []
       let BAELcoor = []
 
-      const formattedCoor = coordinators.map((data)=>{
+      coordinators.map((data)=>{
         let name = `${data?.User?.firstName} ${ data?.User?.middleName ? data?.User?.middleName[0] : ''} ${data?.User?.lastName}, ${data?.extension}`
         let image = data?.User?.image ? data?.User?.image : defaultImage
         let description = data?.description ? data?.description : null
         if(data?.User?.UserCredential?.Course?.acronym === 'BSF'){
-          BSFcoor.push(data?.id)
+          BSFcoor.push({description:description,name:name,id:data?.id,image:image,role:data?.role,pid:headId,subRole:`${data?.User?.UserCredential?.Course?.acronym} Program Coordinator`})
         }else{
-          BAELcoor.push(data?.id)
+          BAELcoor.push({description:description,name:name,id:data?.id,image:image,role:data?.role,pid:headId,subRole:`${data?.User?.UserCredential?.Course?.acronym} Program Coordinator`})
         }
-        return {description:description,name:name,id:data?.id,image:image,role:data?.role,pid:headId,subRole:`${data?.User?.UserCredential?.Course?.acronym} Program Coordinator`}
       })
 
       const BAELmembers = await Faculty.findAll({
@@ -246,10 +245,10 @@ const {
 
 
 
-      const newData = [...formattedSuperior,...formattedCoor,...formattedBAELMember,...formattedBSFMember]
+      const newData = {superiors:formattedSuperior,BAELcoor:BAELcoor,BSFcoor:BSFcoor,baelMembers:formattedBAELMember,bsfMembers:formattedBSFMember}
 
       res.status(200).send(
-        {members:newData}
+        newData
       )
 
 
