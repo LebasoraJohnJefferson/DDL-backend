@@ -119,127 +119,43 @@ exports.deleteStudentOrgMember = async (req,res)=>{
 
   exports.getBsfChart = async (req,res)=>{
     try {
-      let format =null
-      const coor = await BsfStudentChart.findAll({
+      const bsfMemebers = await BsfStudentChart.findAll({
         include:{
           model:User,
           attributes:{exclude:['password']}
-        },
-        where:{
-          role:'Tagapayo'
         }
       })
+      
+      const layers=[
+        ['Tagapayo'],
+        ['Pangulo'],
+        ['Pangalawang Pangulo','Kalihim','Ingat-yaman','Tagasuri'],
+        ['Business Chairperson','Tagapamalita','Lakambini','Lakandiwa'],
+        ['Kinatawan ng 1st Year','Kinatawan ng 2nd Year','Kinatawan ng 3rd Year','Kinatawan ng 4th Year'],
+        ['Kawaksing Kalihim']
+      ]
 
   
       const info = []
-      if(coor && coor?.length > 1){
-        let count = 0
-        coor.map((data,index)=>{
-          let format = {}
-          let pids  = null
-          if(count < coor.length-1){
-            format= dataFormatted(data)
-            pids = coor[index+1].id
-          }else{
-            format = dataFormatted(data)
-            pids = coor[0].id
+      layers.map((layerArr)=>{
+        const innerLayer = []
+        layerArr.map((layer)=>{
+          for (let k = 0; k < bsfMemebers.length; k++) {
+            const member = bsfMemebers[k];
+            if (layer === member?.role) {
+                const formatted = dataFormatted(member);
+                innerLayer.push(formatted);
+                // Remove processed member from bsfMemebers
+                bsfMemebers.splice(k, 1);
+                k--; // Decrement k to account for removed element
+            }
           }
-          info.push({...format,pids:[pids]})
-          count++
         })
-      }
-
-      const pangulo = await BsfStudentChart.findOne({
-        include:{
-          model:User,
-          attributes:{exclude:['password']}
-        },
-        where:{
-          role:'Pangulo'
+        if(innerLayer?.length!=0){
+          info.push(innerLayer)
         }
       })
-
-      if(pangulo) format = dataFormatted(pangulo)
-      if(coor && coor?.length > 1 && pangulo){
-        info.push({...format,mid:[coor[0].id],fid:[coor[1].id]})
-      }else if(coor.length == 1){
-        info.push({...format,mid:[coor[0].id]})
-      }
-
-      const pangalawangLayer = await BsfStudentChart.findAll({
-        include:{
-          model:User,
-          attributes:{exclude:['password']}
-        },
-        where:{
-          role:{
-            [Op.in]:['Pangalawang Pangulo','Kalihim','Ingat-yaman','Tagasuri']
-          }
-        }
-      })
-
-
-      if(pangulo && pangulo?.length!=0){
-        pangalawangLayer.map((data)=>{
-          format = dataFormatted(data)
-          info.push({...format,mid:pangulo?.id})
-        })
-      }
-
-      const pangatlongLayer = await BsfStudentChart.findAll({
-        include:{
-          model:User,
-          attributes:{exclude:['password']}
-        },
-        where:{
-          role:{
-            [Op.in]:['Business Chairperson','Tagapamalita','Lakambini','Lakandiwa']
-          }
-        }
-      })
-
-      if(pangalawangLayer && pangalawangLayer?.length!=0){
-        pangatlongLayer.map((data,index)=>{
-          format = dataFormatted(data)
-          let assignedIndex = index == pangalawangLayer.length-1 ? pangalawangLayer.length-1 : index
-          info.push({...format,mid:pangalawangLayer[assignedIndex]?.id})
-        })
-      }
-
-      const pangataptLayer = await BsfStudentChart.findAll({
-        include:{
-          model:User,
-          attributes:{exclude:['password']}
-        },
-        where:{
-          role:{
-            [Op.in]:['Kinatawan ng 1st Year','Kinatawan ng 2nd Year','Kinatawan ng 3rd Year','Kinatawan ng 4th Year']
-          }
-        }
-      })
-
-      if(pangatlongLayer && pangatlongLayer?.length!=0){
-        pangataptLayer.map((data,index)=>{
-          format = dataFormatted(data)
-          let assignedIndex = index == pangatlongLayer.length-1 ? pangatlongLayer.length-1 : index
-          info.push({...format,mid:pangatlongLayer[assignedIndex]?.id})
-        })
-      }
-
-      const huliLayer = await BsfStudentChart.findOne({
-        include:{
-          model:User,
-          attributes:{exclude:['password']}
-        },
-        where:{
-          role:'Kawaksing Kalihim'
-        }
-      })
-
-      if(huliLayer && pangataptLayer){
-        format = dataFormatted(huliLayer)
-        info.push({...format,mid:pangataptLayer[0]?.id})
-      }
+      
 
 
       res.status(200).json({members:info})
