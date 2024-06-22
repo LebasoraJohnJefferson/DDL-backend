@@ -119,177 +119,47 @@ exports.deleteStudentOrgMember = async (req,res)=>{
 
 exports.getBaelChart = async (req,res)=>{
   try {
-    const coor = await BaelStudentChart.findAll({
+    const baelMembers = await BaelStudentChart.findAll({
       include:{
         model:User,
         attributes:{exclude:['password']}
-      },
-      where:{
-        role:'ELSoc Adviser'
       }
     })
 
+    layers = [
+      ['ELSoc Adviser'],
+      ['President'],
+      ['Vice President'],
+      ['Secretary','Assistant Secretary'],
+      ['Treasurer','Assistant Treasurer'],
+      ['Auditor','Public Information Officer (PIO)','Head Business & Project Committee'],
+      ['1st Year Representative','2nd Year Representative','3rd Year Representative','4th Year Representative']
+    ]
 
 
-    const info = []
-    if(coor && coor?.length > 1){
-      let count = 0
-      coor.map((data,index)=>{
-        let format = {}
-        let pids  = null
-        if(count < coor.length-1){
-          format= dataFormatted(data)
-          pids = coor[index+1].id
-        }else{
-          format = dataFormatted(data)
-          pids = coor[0].id
-        }
-        info.push({...format,pids:[pids]})
-        count++
-      })
-    }
+    
 
-    const president = await BaelStudentChart.findOne({
-      include:{
-        model:User,
-        attributes:{exclude:['password']}
-      },
-      where:{
-        role:'President'
-      }
-    })
-
-    let formattedPresident =null
-    if(president) formattedPresident = dataFormatted(president)
-    if(coor && coor?.length > 1 && president){
-      info.push({...formattedPresident,mid:[coor[0].id],fid:[coor[1].id]})
-    }else if(coor.length == 1){
-      info.push({...formattedPresident,mid:[coor[0].id]})
-    }
-
-    const vicePresident = await BaelStudentChart.findOne({
-      include:{
-        model:User,
-        attributes:{exclude:['password']}
-      },
-      where:{
-        role:'Vice President'
-      }
-    })
-    let formattedVicePresident = null
-    if(vicePresident) formattedVicePresident = dataFormatted(vicePresident)
-    if(formattedPresident && formattedPresident.length!=0 && vicePresident){
-      info.push({...formattedVicePresident,mid:formattedPresident?.id})
-    }
-
-    const anySecretary = await BaelStudentChart.findAll({
-      include:{
-        model:User,
-        attributes:{exclude:['password']}
-      },
-      where:{
-        role:{
-          [Op.in]:['Secretary','Assistant Secretary']
-        }
-      }
-    })
-
-    if(vicePresident){
-      anySecretary.map((data)=>{
-        let formattedAnySecretary = dataFormatted(data)
-        info.push({...formattedAnySecretary,mid:vicePresident?.id})
-      })
-    }
-
-    const Treasurer = await BaelStudentChart.findAll({
-      include:{
-        model:User,
-        attributes:{exclude:['password']}
-      },
-      where:{
-        role:{
-          [Op.in]:['Treasurer','Assistant Treasurer']
-        }
-      }
-    })
-
-    if(anySecretary && anySecretary?.length != 0){
-      Treasurer.map((data,index)=>{
-        let pids = null
-        let formattedAnyTreasurer = dataFormatted(data)
-        let mid = index > anySecretary.length ? anySecretary[0]?.id : anySecretary[index]?.id 
-        if(anySecretary.length == 1) pids = anySecretary[0]?.id;
-        info.push({...formattedAnyTreasurer,mid:mid,pids:[pids]})
-      })
-    }
-
-    const APBcategory = await BaelStudentChart.findAll({
-      include:{
-        model:User,
-        attributes:{exclude:['password']}
-      },
-      where:{
-        role:{
-          [Op.in]:['Head Business & Project Committee','Auditor','Public Information Officer (PIO)']
-        }
-      }
-    })
-
-    if(Treasurer && Treasurer?.length != 0){
-      APBcategory.map((data,index)=>{
-        let formattedAPBcategory = dataFormatted(data)
-        let mid = null
-        let fid = null
-        if(index == 0 || index+1 == APBcategory.length){
-            mid = index == 0 ? Treasurer[0]?.id : Treasurer[Treasurer.length-1]?.id
-        }else{
-            mid = Treasurer.length == 1 ? Treasurer[index]?.id : Treasurer[0]?.id
-        }
-        info.push({...formattedAPBcategory,mid:mid,fid:fid})
-      })
-    }
-
-
-    const representative = await BaelStudentChart.findAll({
-      include:{
-        model:User,
-        attributes:{exclude:['password']}
-      },
-      where:{
-        role:{
-          [Op.in]:[
-            '1st Year Representative',
-            '2nd Year Representative',
-            '3rd Year Representative',
-            '4th Year Representative',
-          ]
-        }
-      }
-    })
-
-    if(APBcategory){
-        let temp = 0
-      representative.map((data,index)=>{
-        let mid = null
-        let formattedRepresentative = dataFormatted(data)
-        if(index == 0 || index == APBcategory.length-1){
-          mid = index == 0 ? APBcategory[0]?.id : APBcategory[APBcategory.length-1]?.id;
-        }else{
-          if(APBcategory.length == 2){
-            mid = APBcategory[1]?.id
-          }else{
-            if(APBcategory.length>2){
-              if(APBcategory[index]) temp = index
-              mid = APBcategory[temp]?.id
-            }else{
-              mid = APBcategory[0]?.id
-            }
+    const info =[]
+    layers.map((layerArr)=>{
+      const innerLayer = []
+      layerArr.map((layer)=>{
+        for (let k = 0; k < baelMembers.length; k++) {
+          const member = baelMembers[k];
+          if (layer === member?.role) {
+              const formatted = dataFormatted(member);
+              innerLayer.push(formatted);
+              // Remove processed member from baelMembers
+              baelMembers.splice(k, 1);
+              k--; // Decrement k to account for removed element
           }
-         
         }
-        info.push({...formattedRepresentative,mid:mid})
       })
-    }
+      if(innerLayer?.length!=0){
+        info.push(innerLayer)
+      }
+    })
+    
+    
 
     res.status(200).json({members:info})
   } catch (error) { 
